@@ -133,8 +133,8 @@ func (f *Factory) TunedConfigMapRecommend(tunedArray []tunedv1.Tuned) (*corev1.C
 
 func (f *Factory) TunedDaemonSet() (*appsv1.DaemonSet, error) {
 	ds, err := NewDaemonSet(MustAssetReader(TunedDaemonSet))
-	imageTuned := ntoconfig.NodeTunedImage()
-	ds.Spec.Template.Spec.Containers[0].Image = imageTuned
+	ds.Spec.Template.Spec.Containers[0].Image = ntoconfig.NodeTunedImage("RHEL7")
+	ds.Spec.Template.Spec.Containers[1].Image = ntoconfig.NodeTunedImage("RHEL8")
 
 	if err != nil {
 		return nil, err

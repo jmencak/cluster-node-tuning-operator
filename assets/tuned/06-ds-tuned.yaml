@@ -17,15 +17,16 @@ spec:
       serviceAccountName: tuned
       automountServiceAccountToken: true
       containers:
+      # RHEL7 based container
       - command:
         - /var/lib/tuned/bin/run
         resources:
           requests:
             cpu: 10m
             memory: 20Mi
-        image: ${CLUSTER_NODE_TUNED_IMAGE}
+        image: ${CLUSTER_NODE_TUNED_IMAGE_RHEL7}
         imagePullPolicy: IfNotPresent
-        name: tuned
+        name: tuned-rhel7
         resources: {}
         securityContext:
           privileged: true
@@ -47,6 +48,51 @@ spec:
         - mountPath: /lib/modules
           name: lib-modules
           readOnly: true
+        - mountPath: /host/etc/os-release
+          name: host-etc-os-release
+          readOnly: true
+        env:
+          - name: OCP_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: RESYNC_PERIOD
+            value: "60"
+
+      # RHEL8 based container
+      - command:
+        - /var/lib/tuned/bin/run
+        resources:
+          requests:
+            cpu: 10m
+            memory: 20Mi
+        image: ${CLUSTER_NODE_TUNED_IMAGE_RHEL8}
+        imagePullPolicy: IfNotPresent
+        name: tuned-rhel8
+        resources: {}
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/tuned/recommend.d
+          name: etc-tuned-recommend
+        - mountPath: /var/lib/tuned/profiles-data
+          name: var-lib-tuned-profiles-data
+        - mountPath: /sys
+          name: sys
+        - mountPath: /var/run/dbus
+          name: var-run-dbus
+          readOnly: true
+        - mountPath: /run/systemd/system
+          name: run-systemd-system
+          readOnly: true
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /host/etc/os-release
+          name: host-etc-os-release
+          readOnly: true
         env:
           - name: OCP_NODE_NAME
             valueFrom:
@@ -67,6 +113,9 @@ spec:
       - hostPath:
           path: /lib/modules
         name: lib-modules
+      - hostPath:
+          path: /etc/os-release
+        name: host-etc-os-release
       - configMap:
           items:
           - key: tuned-ocp-recommend
@@ -81,6 +130,7 @@ spec:
           name: tuned-profiles
           optional: true
         name: var-lib-tuned-profiles-data
+
       dnsPolicy: ClusterFirst
       nodeSelector:
         beta.kubernetes.io/os: linux
