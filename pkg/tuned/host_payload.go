@@ -85,7 +85,7 @@ User=root
 
 	return ign3types.Unit{
 		Contents: pointer.StringPtr(unit),
-		Enabled:  pointer.BoolPtr(false),
+		Enabled:  pointer.BoolPtr(true),
 		Name:     "stalld.service"}
 }
 
